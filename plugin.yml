@@ -1,0 +1,50 @@
+main: fr.nicofighter45.survival.Main
+name: VanadiumEconomy
+version: '1.0'
+description: Plugin pour economie de survie Vanadium
+author: nicofighter45
+api-version: 1.16
+commands:
+  pay:
+   description: give money to a player
+   permission: def.use
+  spawn:
+   description: tp you to spawn
+   permission: def.use
+  setspawn:
+   description: set spawn teleportation
+   permission: op.use
+  base:
+   description: tp you to your base
+   permission: def.use
+  setbase:
+   description: set your base teleportation
+   permission: def.use
+  money:
+   description: get money of a player
+   permission: def.use
+  info:
+   description: get information of the server
+   permission: def.use
+  eco:
+   description: manage economy
+   permission: op.use
+  set:
+   description: change player attributes
+   permission: op.use
+  test:
+   description: testing command
+   permission: op.use
+  setspawnboss:
+   description: spawning boss command
+   permission: op.use
+  bossitemblock:
+   description: get and change item block for boss
+   permission: op.use
+permissions:
+  op.use:
+   description: Allows ops commands
+   default: op
+  def.use:
+   description: Allows defaults commands
+   default: true
