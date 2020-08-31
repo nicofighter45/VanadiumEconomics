@@ -2,9 +2,7 @@ package fr.nicofighter45.survival;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
@@ -98,20 +96,12 @@ public class Main extends JavaPlugin{
 		boss = new Boss(this, config);
 		team = new team(this);
 		String location = config.getString("spawn");
+		assert location != null;
 		String[] locationdecoup = location.split(",");
 		spawn = new Location(world, Integer.parseInt(locationdecoup[0]), Integer.parseInt(locationdecoup[1]), Integer.parseInt(locationdecoup[2]));
-		getCommand("spawn").setExecutor(new Command());
-		getCommand("setspawn").setExecutor(new Command());
-		getCommand("pay").setExecutor(new Command());
-		getCommand("base").setExecutor(new Command());
-		getCommand("setbase").setExecutor(new Command());
-		getCommand("money").setExecutor(new Command());
-		getCommand("eco").setExecutor(new Command());
-		getCommand("info").setExecutor(new Command());
-		getCommand("set").setExecutor(new Command());
-		getCommand("test").setExecutor(new Command());
-		getCommand("setspawnboss").setExecutor(new Command());
-		getCommand("bossitemblock").setExecutor(new Command());
+		for (String s1 : Arrays.asList("spawn", "setspawn", "pay", "base", "setbase", "money", "eco", "info", "set", "test", "setspawnboss", "bossitemblock")) {
+			Objects.requireNonNull(getCommand(s1)).setExecutor(new Command());
+		}
 		Bukkit.getPluginManager().registerEvents(new Listenner(), this);
 		new ScoreboardRun(this).runTaskTimer(this, 0 , 20);
 		newcraft();
@@ -144,13 +134,13 @@ public class Main extends JavaPlugin{
 			config.set("boss." + entry.getKey().getValue(), entry.getValue().getX() + "," + entry.getValue().getY() + "," + entry.getValue().getZ());
 		}
 		for(Entry<Material, List<State>> entry : boss.itemBlock.entrySet()) {
-			String states = "";
+			StringBuilder states = new StringBuilder();
 			for(State s : entry.getValue()) {
 				if(s != null) {
-					states+=s.getValue() + ",";
+					states.append(s.getValue()).append(",");
 				}
 			}
-			config.set("item." + entry.getKey().toString().toLowerCase() + ".boss", states);
+			config.set("item." + entry.getKey().toString().toLowerCase() + ".boss", states.toString());
 		}
 		try {
 			config.save(file);
