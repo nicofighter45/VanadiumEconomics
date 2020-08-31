@@ -1,7 +1,9 @@
 package fr.nicofighter45.survival;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -51,10 +53,6 @@ public class Listenner implements Listener {
 			Main.main.configplayer.add(p.getName());
 			Main.main.addPlayer(p.getName());
 		}
-
-		//a retirer
-		Main.main.state.remove(p.getName());
-
 		Main.main.state.put(p.getName(), State.P);
 		e.getPlayer().setCollidable(false);
 		p.setHealthScale((double)Main.main.hearts.get(p.getName()));
@@ -65,6 +63,7 @@ public class Listenner implements Listener {
 			Main.main.team.teams(player);
 		}
 		e.setJoinMessage("§7(§9i§7) §f>> §f" + p.getName() + "§7 a rejoint");
+		//a modifier (!)
 		if(p.hasPlayedBefore()) {
 			p.sendMessage("§7(§ci§7) §f>> §7Bienvenue sur le server §4survie §7de §6Vanadium §7! Fait /info pour obtenir plus d'informations sur le server !");
 			Inventory i = Bukkit.createInventory(null, 27, "Choisi ton métier !");
@@ -81,7 +80,7 @@ public class Listenner implements Listener {
 	public void playerportalevent(PlayerPortalEvent e) {
 		Player p = e.getPlayer();
 		State state = Main.main.state.get(p.getName());
-		if(e.getTo().getBlock().getWorld().getEnvironment() == Environment.NETHER && (state == State.F || state == State.P || state == State.O)){
+		if(Objects.requireNonNull(e.getTo()).getBlock().getWorld().getEnvironment() == Environment.NETHER && (state == State.F || state == State.P || state == State.O)){
 			cancellingBiome(e, p);
 		}else if(e.getTo().getBlock().getWorld().getEnvironment() == Environment.THE_END && (state != State.E && state != State.S)) {
 			cancellingBiome(e, p);
@@ -95,7 +94,7 @@ public class Listenner implements Listener {
 		if(Main.main.deadplayer.containsKey(p.getName())) {
 			e.setCancelled(true);
 		}
-		Biome biome = e.getTo().getBlock().getBiome();
+		Biome biome = Objects.requireNonNull(e.getTo()).getBlock().getBiome();
 		Biome[] listbiomestone = {Biome.FOREST, Biome.PLAINS, Biome.SUNFLOWER_PLAINS, Biome.BIRCH_FOREST, Biome.BIRCH_FOREST_HILLS, Biome.TALL_BIRCH_FOREST, Biome.RIVER, Biome.BEACH, Biome.DARK_FOREST, Biome.DARK_FOREST_HILLS};
 		Biome[] listbiomefer = {Biome.DESERT, Biome.DESERT_HILLS, Biome.DESERT_LAKES, Biome.ICE_SPIKES, Biome.FROZEN_RIVER, Biome.SWAMP, Biome.SWAMP_HILLS};
 		Biome[] listbiomeor = {Biome.MOUNTAINS, Biome.GRAVELLY_MOUNTAINS, Biome.MODIFIED_GRAVELLY_MOUNTAINS, Biome.WOODED_MOUNTAINS};
@@ -126,16 +125,11 @@ public class Listenner implements Listener {
 			}
 			break;
 		case R:
-			//a checker dans un autre event
 			if(e.getTo().getBlock().getWorld().getEnvironment() == Environment.NETHER && biome != Biome.NETHER_WASTES) {
 				cancellingBiome(e, p);
 			}
 			break;
-		case NN:
-			//a checker dans un autre event
-			break;
 		case E:
-			//a checker dans un autre event
 			if(e.getTo().getBlock().getWorld().getEnvironment() == Environment.THE_END && !biomes(listbiomeend).contains(biome)) {
 				cancellingBiome(e, p);
 			}
@@ -144,11 +138,7 @@ public class Listenner implements Listener {
 	}
 	
 	private List<Biome> biomes(Biome[] biomes) {
-		List<Biome> list = new ArrayList<>();
-		for(Biome b : biomes) {
-			list.add(b);
-		}
-		return list;
+		return new ArrayList<>(Arrays.asList(biomes));
 	}
 	
 	@SuppressWarnings("deprecation")
