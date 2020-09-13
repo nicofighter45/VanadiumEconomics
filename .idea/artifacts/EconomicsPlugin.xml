@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="EconomicsPlugin">
+    <output-path>$USER_HOME$/OneDrive/Bureau/mc/vanadium network/Economics/plugins</output-path>
+    <root id="archive" name="EconomicsPlugin.jar">
+      <element id="module-output" name="VanadiumEconomics" />
+    </root>
+  </artifact>
+</component>

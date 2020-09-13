@@ -12,6 +12,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.nicofighter45.entity.Villager;
@@ -368,6 +370,9 @@ public class Command implements CommandExecutor {
 						Main.main.state.put(t.getName(), state);
 	    				p.sendMessage("§7(§9i§7) §f>> §7Vous êtes à présent §4" + state.getName() + "§7 (changer par un admin)");
 						t.sendMessage("§7(§9i§7) §f>> §7Le joueur §4" + t.getName() + "§7 est à présent §4" + state.getName());
+						for(Player player : Bukkit.getOnlinePlayers()) {
+							Main.main.team.teams(player);
+						}
 					}else {
 						p.sendMessage("§7(§c!§7) §f>> §7Le nombre doit être entre 0 et 7");
 					}

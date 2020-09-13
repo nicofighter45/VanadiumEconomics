@@ -35,6 +35,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.nicofighter45.entity.TeamFight;
@@ -56,9 +58,6 @@ public class Listenner implements Listener {
 		Main.main.state.put(p.getName(), State.P);
 		e.getPlayer().setCollidable(false);
 		p.setHealthScale((double)Main.main.hearts.get(p.getName()));
-		ScoreboardCustom board = new ScoreboardCustom(p);
-		board.sendLine();
-		board.setScoreboard();
 		for(Player player : Bukkit.getOnlinePlayers()) {
 			Main.main.team.teams(player);
 		}
@@ -74,13 +73,16 @@ public class Listenner implements Listener {
 			i.setItem(17, item(Material.OAK_WOOD, "§4Bucheron",Metier.BUCHERON.getDesc()));
 			p.openInventory(i);
 		}
+		ScoreboardCustom board = new ScoreboardCustom(p);
+		board.sendLine();
+		board.setScoreboard();
 	}
 	
 	@EventHandler
 	public void playerportalevent(PlayerPortalEvent e) {
 		Player p = e.getPlayer();
 		State state = Main.main.state.get(p.getName());
-		if(Objects.requireNonNull(e.getTo()).getBlock().getWorld().getEnvironment() == Environment.NETHER && (state == State.F || state == State.P || state == State.O)){
+		if(Objects.requireNonNull(e.getTo()).getBlock().getWorld().getEnvironment() == Environment.NETHER && (state == State.F || state == State.P || state == State.O)) {
 			cancellingBiome(e, p);
 		}else if(e.getTo().getBlock().getWorld().getEnvironment() == Environment.THE_END && (state != State.E && state != State.S)) {
 			cancellingBiome(e, p);
@@ -205,10 +207,49 @@ public class Listenner implements Listener {
 		p.sendMessage("§7(§ee§7) §f>> §7Vous êtes a présent à §4" + Main.main.money.get(p.getName()) + "€");
 	}
 
-	@EventHandler
+	//@EventHandler
 	public void damage(EntityDamageEvent e) {
 		if(e.getEntity() instanceof Player) {
 			Player p = (Player) e.getEntity();
+			int regen = 0;
+			switch(Main.main.state.get(p.getName())){
+				case F:
+					regen = 2; //20
+					break;
+				case O:
+					regen = 4; //20
+					break;
+				case N:
+					regen = 6; //20
+					break;
+				case R:
+					regen = 8; //25
+					break;
+				case NN:
+					regen = 10; //30
+					break;
+				case E:
+					regen = 15; //35
+					break;
+				case S:
+					regen = 20; //40
+					break;
+			}
+			if(p.getHealth() - e.getFinalDamage() < regen){
+				int finalRegen = regen;
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						if(p.getHealth() < finalRegen){
+							if(p.getFoodLevel() > 10){
+								p.setHealth(p.getHealth() + 1);
+							}
+						}else{
+							cancel();
+						}
+					}
+				}.runTaskTimer(Main.main, 0, 50);
+			}
 			if(p.getInventory().getLeggings() == null) return;
 			if(p.getInventory().getLeggings().getItemMeta() != null) {
 				if(e.getCause() == DamageCause.FALL && p.getInventory().getLeggings().getItemMeta().getDisplayName().equals("§2Emerald Leggings")){
@@ -390,10 +431,18 @@ public class Listenner implements Listener {
 			e.setCancelled(true);
 			((Player) e.getWhoClicked()).openInventory(tradeItem(i.getItem(22).getType(), text));
 		}else if(i.contains(item(Material.STONE, "§7Boss de l'âge de Pierre", "§aDébloqué"))) {
-			TeamFight tf = new TeamFight(Main.main, State.P);
-			tf.addPlayer((Player) e.getWhoClicked());
-			e.setCancelled(true);
-			e.getWhoClicked().closeInventory();
+			if(item.getItemMeta().getLore().get(0).equalsIgnoreCase("§aDébloqué")){
+				//a changer
+				TeamFight tf = new TeamFight(Main.main, Main.main.state.get(e.getWhoClicked().getName()));
+				tf.addPlayer((Player) e.getWhoClicked());
+				e.setCancelled(true);
+				e.getWhoClicked().closeInventory();
+			}else{
+				Player p = (Player) e.getWhoClicked();
+				p.sendMessage("§7(§4!§7) §f>> §7Vous n'avez pas encore débloqué ce §4boss");
+				p.closeInventory();
+				e.setCancelled(true);
+			}
 		}else if(i.contains(item(Material.OAK_SIGN, "§6Info", "§6Tous ses métiers ont des avantages en combat et de nouveaux crafts uniques."))) {
 			e.setCancelled(true);
 			Player p = (Player) e.getWhoClicked();
@@ -422,6 +471,11 @@ public class Listenner implements Listener {
 		if(e.getItem().getItemMeta() == null) return;
 		if(e.getItem().getItemMeta().getDisplayName().equals("§6Boss")) {
 			new Zombie(e.getPlayer().getLocation(), 1);
+		}
+		Player p = e.getPlayer();
+		if(e.getItem().getItemMeta().getDisplayName().equals("§dExtra Heart")) {
+			heart(p);
+			e.setCancelled(true);
 		}
 	}
 

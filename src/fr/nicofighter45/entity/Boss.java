@@ -54,18 +54,27 @@ public class Boss {
 			new Zombie(bossLoc.get(team.state), 0);
 			break;
 		case F:
+			new Zombie(bossLoc.get(team.state), 1);
+			new Zombie(bossLoc.get(team.state), 2);
+			new Zombie(bossLoc.get(team.state), 1);
 			break;
 		case O:
+			//skelette
 			break;
 		case N:
+			//blaze
 			break;
 		case R:
+			//wither
 			break;
 		case NN:
+			//ghast invisible
 			break;
 		case E:
+			//ender dragon
 			break;
 		case S:
+			//vendicateur
 			break;
 		default:
 			break;
