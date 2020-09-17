@@ -100,9 +100,9 @@ public class Main extends JavaPlugin{
 		String[] locationdecoup = location.split(",");
 		spawn = new Location(world, Integer.parseInt(locationdecoup[0]), Integer.parseInt(locationdecoup[1]), Integer.parseInt(locationdecoup[2]));
 		for (String s1 : Arrays.asList("spawn", "setspawn", "pay", "base", "setbase", "money", "eco", "info", "set", "test", "setspawnboss", "bossitemblock")) {
-			Objects.requireNonNull(getCommand(s1)).setExecutor(new Command());
+			Objects.requireNonNull(getCommand(s1)).setExecutor(new Command(this));
 		}
-		Bukkit.getPluginManager().registerEvents(new Listenner(), this);
+		Bukkit.getPluginManager().registerEvents(new Listenner(this), this);
 		new ScoreboardRun(this).runTaskTimer(this, 0 , 20);
 		newcraft();
 		System.out.println("Le plugin VanadiumEconomy est lance. Economy du server operationnel");

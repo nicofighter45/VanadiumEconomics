@@ -59,13 +59,13 @@ public class Boss {
 			new Zombie(bossLoc.get(team.state), 1);
 			break;
 		case O:
-			//skelette
+			new Skeleton(bossLoc.get(team.state));
 			break;
 		case N:
-			//blaze
+			new Blaze(bossLoc.get(team.state));
 			break;
 		case R:
-			//wither
+			new Wither(bossLoc.get(team.state));
 			break;
 		case NN:
 			//ghast invisible

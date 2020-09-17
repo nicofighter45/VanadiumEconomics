@@ -48,18 +48,24 @@ import fr.nicofighter45.scoreboard.ScoreboardCustom;
 
 public class Listenner implements Listener {
 
+	private Main instance;
+
+	public Listenner(Main instance) {
+		this.instance = instance;
+	}
+
 	@EventHandler
 	public void join(PlayerJoinEvent e) {
 		Player p = e.getPlayer();
-		if(!Main.main.configplayer.contains(p.getName())) {
-			Main.main.configplayer.add(p.getName());
-			Main.main.addPlayer(p.getName());
+		if(!instance.configplayer.contains(p.getName())) {
+			instance.configplayer.add(p.getName());
+			instance.addPlayer(p.getName());
 		}
-		Main.main.state.put(p.getName(), State.P);
+		instance.state.put(p.getName(), State.P);
 		e.getPlayer().setCollidable(false);
-		p.setHealthScale((double)Main.main.hearts.get(p.getName()));
+		p.setHealthScale((double)instance.hearts.get(p.getName()));
 		for(Player player : Bukkit.getOnlinePlayers()) {
-			Main.main.team.teams(player);
+			instance.team.teams(player);
 		}
 		e.setJoinMessage("§7(§9i§7) §f>> §f" + p.getName() + "§7 a rejoint");
 		//a modifier (!)
@@ -81,7 +87,7 @@ public class Listenner implements Listener {
 	@EventHandler
 	public void playerportalevent(PlayerPortalEvent e) {
 		Player p = e.getPlayer();
-		State state = Main.main.state.get(p.getName());
+		State state = instance.state.get(p.getName());
 		if(Objects.requireNonNull(e.getTo()).getBlock().getWorld().getEnvironment() == Environment.NETHER && (state == State.F || state == State.P || state == State.O)) {
 			cancellingBiome(e, p);
 		}else if(e.getTo().getBlock().getWorld().getEnvironment() == Environment.THE_END && (state != State.E && state != State.S)) {
@@ -93,7 +99,7 @@ public class Listenner implements Listener {
 	@EventHandler
 	public void moovePlayer(PlayerMoveEvent e) {
 		Player p = e.getPlayer();
-		if(Main.main.deadplayer.containsKey(p.getName())) {
+		if(instance.deadplayer.containsKey(p.getName())) {
 			e.setCancelled(true);
 		}
 		Biome biome = Objects.requireNonNull(e.getTo()).getBlock().getBiome();
@@ -105,7 +111,7 @@ public class Listenner implements Listener {
 		//new-nether -> tous le nether
 		Biome[] listbiomeend = {Biome.THE_END, Biome.THE_VOID};
 		//superior   -> tous le jeu
-		switch(Main.main.state.get(p.getName())) {
+		switch(instance.state.get(p.getName())) {
 		case P:
 			if(!biomes(listbiomestone).contains(biome)) {
 				cancellingBiome(e, p);
@@ -156,7 +162,7 @@ public class Listenner implements Listener {
 			if(e.getFinalDamage() >= player.getHealth()) {
 				player.setHealth(20);
 				player.setGameMode(GameMode.SPECTATOR);
-				Main.main.deadplayer.put(player.getName(), player.getLocation());
+				instance.deadplayer.put(player.getName(), player.getLocation());
 				player.teleport(new Location(Main.main.world, Main.main.spawn.getX(), Main.main.spawn.getY() + 20, Main.main.spawn.getZ()));
 				Inventory i = Bukkit.createInventory(null, 27, "§4Tu es mort");
 				i.setItem(11, item(Material.GOLDEN_APPLE, "§aRespawn comme en survie", "§9Avec 10% de money en moins"));
@@ -171,7 +177,7 @@ public class Listenner implements Listener {
 	public void leave(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
 		e.setQuitMessage("§7(§9i§7) §f>> §f" + p.getName() + " §7 a quitté");
-		Main.main.sc.remove(p);
+		instance.sc.remove(p);
 	}
 
 	@EventHandler
@@ -182,7 +188,7 @@ public class Listenner implements Listener {
 
 	@EventHandler
 	public void night(PlayerBedLeaveEvent e) {
-		Main.main.world.setTime(0);
+		instance.world.setTime(0);
 	}
 
 	@EventHandler
@@ -197,12 +203,12 @@ public class Listenner implements Listener {
 	@EventHandler
 	public void dead(PlayerDeathEvent e) {
 		Player p = e.getEntity();
-		double money = Main.main.money.get(p.getName());
-		Main.main.money.remove(p.getName());
+		double money = instance.money.get(p.getName());
+		instance.money.remove(p.getName());
 		if (money - 100 > 0) {
-			Main.main.money.put(p.getName(), money - 100);
+			instance.money.put(p.getName(), money - 100);
 		}else {
-			Main.main.money.put(p.getName(), 0.0D);
+			instance.money.put(p.getName(), 0.0D);
 		}
 		p.sendMessage("§7(§ee§7) §f>> §7Vous êtes a présent à §4" + Main.main.money.get(p.getName()) + "€");
 	}
@@ -212,7 +218,7 @@ public class Listenner implements Listener {
 		if(e.getEntity() instanceof Player) {
 			Player p = (Player) e.getEntity();
 			int regen = 0;
-			switch(Main.main.state.get(p.getName())){
+			switch(instance.state.get(p.getName())){
 				case F:
 					regen = 2; //20
 					break;
@@ -268,8 +274,8 @@ public class Listenner implements Listener {
 			e.getPlayer().openInventory(bossInv(e.getPlayer()));
 			e.setCancelled(true);
 		}else if(e.getRightClicked().getCustomName().equals("§6Start")) {
-			if(Main.main.teamFight.containsKey(e.getPlayer().getName())) {
-				Main.main.teamFight.get(e.getPlayer().getName()).startFight();
+			if(instance.teamFight.containsKey(e.getPlayer().getName())) {
+				instance.teamFight.get(e.getPlayer().getName()).startFight();
 			}
 		}
 	}
@@ -288,7 +294,7 @@ public class Listenner implements Listener {
 	}
 
 	private String accessBoss(int i, Player p) {
-		if(Main.main.state.get(p.getName()).getValue() >= i) {
+		if(instance.state.get(p.getName()).getValue() >= i) {
 			return "§aDébloqué";
 		}else {
 			return "§cIndisponible à ton niveau";
@@ -308,7 +314,7 @@ public class Listenner implements Listener {
 	private Inventory tradeItem(Material type, String name) {
 		Inventory n = Bukkit.createInventory(null, 45, "§6Trade");
 		String[] tab = name.split(" ");
-		double value = Double.parseDouble(tab[1]) * Main.main.price.getItemPrice(type);
+		double value = Double.parseDouble(tab[1]) * instance.price.getItemPrice(type);
 		if(tab[0].equals("Vendre")) {
 			value/=10;
 		}
@@ -333,6 +339,7 @@ public class Listenner implements Listener {
 		ItemMeta m = s.getItemMeta();
 		List<String> list= new ArrayList<>();
 		list.add(lore);
+		assert m != null;
 		m.setLore(list);
 		m.setDisplayName(name);
 		s.setItemMeta(m);
@@ -342,6 +349,7 @@ public class Listenner implements Listener {
 	private ItemStack item(Material type, String name) {
 		ItemStack s = new ItemStack(type);
 		ItemMeta m = s.getItemMeta();
+		assert m != null;
 		m.setDisplayName(name);
 		s.setItemMeta(m);
 		return s;
@@ -356,19 +364,20 @@ public class Listenner implements Listener {
 		if(i.contains(item(Material.BRICKS, "§9Construction")) || i.contains(item(Material.WHEAT, "§aFarm"))) {
 			Inventory n = Bukkit.createInventory(null, 54, "§6Shop");
 			int number = 0;
-			for(Material type : Main.main.price.materialbuy) {
+			for(Material type : instance.price.materialbuy) {
 				if(number == 44) {
 					break;
 				}
-				Category cate = Main.main.price.getItemcategory(type);
+				Category cate = instance.price.getItemcategory(type);
 				if(cate == Category.CONSTRUCTION && item.getType() == Material.BRICKS || cate == Category.FARM && item.getType() == Material.WHEAT || cate == Category.AUTRE && item.getType() == Material.REDSTONE_LAMP
 						|| cate == Category.MINERAUX && item.getType() == Material.DIAMOND_ORE || cate == Category.COMBAT && item.getType() == Material.NETHERITE_SWORD) {
-					double v = Main.main.price.getItemPrice(type);
+					double v = instance.price.getItemPrice(type);
 					ItemStack s = new ItemStack(type);
 					ItemMeta m = s.getItemMeta();
 					ArrayList<String> list= new ArrayList<>();
 					list.add("§4Acheter pour " + v + "€");
 					list.add("§4Vendre pour " + v/10 + "€");
+					assert m != null;
 					m.setLore(list);
 					s.setItemMeta(m);
 					n.setItem(number, s);
@@ -385,7 +394,7 @@ public class Listenner implements Listener {
 			e.setCancelled(true);
 			((Player) e.getWhoClicked()).openInventory(tradeItem(item.getType(), "Acheter 0"));
 		}else if(i.contains(item(Material.BARRIER, "§6Retour"))) {
-			String text = i.getItem(22).getItemMeta().getDisplayName();
+			String text = Objects.requireNonNull(Objects.requireNonNull(i.getItem(22)).getItemMeta()).getDisplayName();
 			String[] t = text.split(" ");
 			if(item.getType() == Material.RED_STAINED_GLASS_PANE || item.getType() == Material.GREEN_STAINED_GLASS_PANE) {
 				String name = item.getItemMeta().getDisplayName();
@@ -419,9 +428,9 @@ public class Listenner implements Listener {
 				System.out.println("t");
 				if(!t[1].equals("0")) {
 					if(t[0].equals("Acheter")) {
-						Main.main.eco.buy((Player) e.getWhoClicked(), i.getItem(22).getType(), Integer.parseInt(t[1]));
+						instance.eco.buy((Player) e.getWhoClicked(), i.getItem(22).getType(), Integer.parseInt(t[1]));
 					}else{
-						Main.main.eco.sell((Player) e.getWhoClicked(), i.getItem(22).getType(), Integer.parseInt(t[1]));
+						instance.eco.sell((Player) e.getWhoClicked(), i.getItem(22).getType(), Integer.parseInt(t[1]));
 					}
 					e.setCancelled(true);
 					e.getWhoClicked().closeInventory();
@@ -433,7 +442,7 @@ public class Listenner implements Listener {
 		}else if(i.contains(item(Material.STONE, "§7Boss de l'âge de Pierre", "§aDébloqué"))) {
 			if(item.getItemMeta().getLore().get(0).equalsIgnoreCase("§aDébloqué")){
 				//a changer
-				TeamFight tf = new TeamFight(Main.main, Main.main.state.get(e.getWhoClicked().getName()));
+				TeamFight tf = new TeamFight(instance, instance.state.get(e.getWhoClicked().getName()));
 				tf.addPlayer((Player) e.getWhoClicked());
 				e.setCancelled(true);
 				e.getWhoClicked().closeInventory();
@@ -449,16 +458,16 @@ public class Listenner implements Listener {
 			if(item.getType() == Material.OAK_SIGN) {
 				return;
 			}else if(item.getType() == Material.WITHER_SKELETON_SKULL) {
-				Main.main.eco.setMetier(p, Metier.COMBATTANT);
+				instance.eco.setMetier(p, Metier.COMBATTANT);
     			p.sendMessage("§7(§9i§7) §f>> §7Vous êtes a présent §4combattant");
 			}else if(item.getType() == Material.DIAMOND_ORE) {
-				Main.main.eco.setMetier(p, Metier.MINEUR);
+				instance.eco.setMetier(p, Metier.MINEUR);
     			p.sendMessage("§7(§9i§7) §f>> §7Vous êtes a présent §4mineur");
 			}else if(item.getType() == Material.WHEAT) {
-				Main.main.eco.setMetier(p, Metier.AGRICULTEUR);
+				instance.eco.setMetier(p, Metier.AGRICULTEUR);
     			p.sendMessage("§7(§9i§7) §f>> §7Vous êtes a présent §4agriculteur");
 			}else if(item.getType() == Material.OAK_WOOD) {
-				Main.main.eco.setMetier(p, Metier.BUCHERON);
+				instance.eco.setMetier(p, Metier.BUCHERON);
     			p.sendMessage("§7(§9i§7) §f>> §7Vous êtes a présent §4bucheron");
 			}
 			p.closeInventory();
@@ -484,10 +493,11 @@ public class Listenner implements Listener {
 		ItemStack i = e.getCurrentItem();
 		Player p = (Player) e.getWhoClicked();
 		Metier me = null;
-		if(Main.main.metier.containsKey(p.getName())) {
-			me = Main.main.metier.get(p.getName());
+		if(instance.metier.containsKey(p.getName())) {
+			me = instance.metier.get(p.getName());
 		}
-		if(i.getItemMeta().getDisplayName().equals("§eFortune Book") && me != Metier.MINEUR) {
+		assert i != null;
+		if(Objects.requireNonNull(i.getItemMeta()).getDisplayName().equals("§eFortune Book") && me != Metier.MINEUR) {
 			p.sendMessage("§7(§4!§7) §f>> §7Vous devez être §4Mineur §7pour effectuer ce craft");
 			e.setCancelled(true);
 		}else if(i.getItemMeta().getDisplayName().equals("§eLooting Book") && me != Metier.COMBATTANT) {
@@ -520,8 +530,8 @@ public class Listenner implements Listener {
 		Player p = e.getPlayer();
 		Metier me = null;
 		Material m = i.getBlockData().getMaterial();
-		if(Main.main.metier.containsKey(p.getName())) {
-			me = Main.main.metier.get(p.getName());
+		if(instance.metier.containsKey(p.getName())) {
+			me = instance.metier.get(p.getName());
 		}
 		if(p.getInventory().getItemInMainHand().getItemMeta() == null) return;
 		if(me == Metier.AGRICULTEUR && p.getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals("§eAutoplanter")) {
@@ -544,28 +554,29 @@ public class Listenner implements Listener {
 						public void run() {
 							i.setType(m);
 						}
-					}.runTaskLater(Main.main, 1);
+					}.runTaskLater(instance, 1);
 				}
 			}
 		}
 	}
 
 	private void heart(Player p) {
-		int heart = Main.main.hearts.get(p.getName());
+		int heart = instance.hearts.get(p.getName());
 		ItemStack extraheart = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 1);
 		ItemMeta extraheratmeta = extraheart.getItemMeta();
+		assert extraheratmeta != null;
 		extraheratmeta.setDisplayName("§dExtra Heart");
 		extraheart.setItemMeta(extraheratmeta);
 		p.getInventory().removeItem(extraheart);
 		if(heart < 39) {
 			p.setHealthScale(p.getHealthScale() + 2);
-			Main.main.hearts.remove(p.getName());
-			Main.main.hearts.put(p.getName(), (int) p.getHealthScale());
+			instance.hearts.remove(p.getName());
+			instance.hearts.put(p.getName(), (int) p.getHealthScale());
 			p.sendMessage("§7(§9i§7) §f>> §7Vous avez a présent §4" + p.getHealthScale() + " §7coeurs");
 		}else {
 			p.sendMessage("§7(§c!§7) §f>> §7Vous avez déjà atteint la limite de §4coeur");
-			Main.main.world.dropItem(p.getLocation(), new ItemStack(Material.DIAMOND_BLOCK, 1));
-			Main.main.world.dropItem(p.getLocation(), new ItemStack(Material.EMERALD_ORE, 4));
+			instance.world.dropItem(p.getLocation(), new ItemStack(Material.DIAMOND_BLOCK, 1));
+			instance.world.dropItem(p.getLocation(), new ItemStack(Material.EMERALD_ORE, 4));
 		}
 	}
 

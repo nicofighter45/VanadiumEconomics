@@ -12,8 +12,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import fr.nicofighter45.entity.Villager;
@@ -23,7 +21,13 @@ import fr.nicofighter45.enumeration.State;
 
 public class Command implements CommandExecutor {
 
-    @Override
+	private Main instance;
+
+	public Command(Main instance) {
+		this.instance = instance;
+	}
+
+	@Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String msg, String[] arg) {
         if(cmd.getName().equalsIgnoreCase("pay")) {
             if(sender instanceof Player) {
@@ -49,7 +53,7 @@ public class Command implements CommandExecutor {
                         		if(p == Bukkit.getPlayer(arg[0])) {
                                     p.sendMessage("§7(§c!§7) §f>> §7Vous ne pouvez pas vous payer vous même");
                                 }else {
-                                    Main.main.eco.pay(p, Bukkit.getPlayer(arg[0]), value);
+                                    instance.eco.pay(p, Bukkit.getPlayer(arg[0]), value);
                                 }
                         	}else {
                         		p.sendMessage("§7(§c!§7) §f>> §7Vous ne pouvez pas payez avec valeure négative");
@@ -73,7 +77,7 @@ public class Command implements CommandExecutor {
                             System.out.println("§7(§c!§7) §f>> §7Le montant doit être un entier");
                         }
                         if(value != 0) {
-                            Main.main.eco.pay(null, Bukkit.getPlayer(arg[0]), value);
+							instance.eco.pay(null, Bukkit.getPlayer(arg[0]), value);
                         }
                     }
                 }
@@ -83,7 +87,7 @@ public class Command implements CommandExecutor {
         }else if(cmd.getName().equalsIgnoreCase("money")) {
             if(arg.length == 0) {
                 if(sender instanceof Player) {
-                    Main.main.eco.getMoney((Player) sender, (Player) sender);
+					instance.eco.getMoney((Player) sender, (Player) sender);
                 }else {
                     System.out.println("Préciser le joueur: /money <player>");
                 }
@@ -93,9 +97,9 @@ public class Command implements CommandExecutor {
                     sender.sendMessage("§7(§c!§7) §f>> §7Ce joueur n'existe pas ou n'est pas connecté");
                 }else {
                     if (sender instanceof Player) {
-                        Main.main.eco.getMoney(t, (Player) sender);
+						instance.eco.getMoney(t, (Player) sender);
                     }else {
-                        Main.main.eco.getMoney(t, null);
+						instance.eco.getMoney(t, null);
                     }
                 }
             }else {
@@ -103,7 +107,7 @@ public class Command implements CommandExecutor {
             }
         }else if(cmd.getName().equalsIgnoreCase("eco")) {
             if(arg.length == 1 && arg[0].equals("rl")) {
-                Main.main.reload();
+				instance.reload();
                 sender.sendMessage("§7(§4CONSOLE§7) §f>> §7Economie du server reload");
             }else if(arg.length == 3) {
             	Material m = Material.getMaterial(arg[0].toUpperCase());
@@ -113,7 +117,7 @@ public class Command implements CommandExecutor {
                         value = Double.parseDouble(arg[1]);
                     } catch(NumberFormatException e) {return false; } catch(NullPointerException e) {return false;}
                     if(value == 0) {
-                    	Main.main.price.removeItem(m);
+						instance.price.removeItem(m);
                     	sender.sendMessage("§7(§c!§7) §f>> §7L'item §4" + m.toString().toLowerCase() + "§7 a été retiré des items en vente");
                     }else if(value < 0) {
                     	sender.sendMessage("§7(§c!§7) §f>> §7Le montant doit être positif");
@@ -124,12 +128,12 @@ public class Command implements CommandExecutor {
                     	}catch(NumberFormatException e) {return false; } catch(NullPointerException e) {return false;}
                     	Category cate = Category.getValuefromInt(v2);
                     	if(cate != null) {
-                    		if(Main.main.price.materialbuy.contains(m)) {
-                    			Main.main.price.materialbuy.remove(m);
+                    		if(instance.price.materialbuy.contains(m)) {
+								instance.price.materialbuy.remove(m);
                     		}
-                    		Main.main.price.materialbuy.add(m);
-                    		Main.main.price.setItemPrice(m, value);
-                    		Main.main.price.setItemcategory(m, cate);
+							instance.price.materialbuy.add(m);
+							instance.price.setItemPrice(m, value);
+							instance.price.setItemcategory(m, cate);
                     	}else {
                     		sender.sendMessage("§7(§c!§7) §f>> §7Cette catégory n'existe pas (0 à 4)");
                     	}
@@ -159,14 +163,14 @@ public class Command implements CommandExecutor {
                         }
                         timer--;
                     }
-                }.runTaskTimer(Main.main, 0, 20);
+                }.runTaskTimer(instance, 0, 20);
             }else if(cmd.getName().equalsIgnoreCase("setspawn")) {
-                Main.main.spawn = new Location(Main.main.world, (int)p.getLocation().getX(), (int)p.getLocation().getY(), (int)p.getLocation().getZ());
+				instance.spawn = new Location(Main.main.world, (int)p.getLocation().getX(), (int)p.getLocation().getY(), (int)p.getLocation().getZ());
                 p.sendMessage("§7[§cCONSOLE§7] §f>> §7Le §4spawn§7 a bien été redéfinis en " + (int)p.getLocation().getX() + "," + (int)p.getLocation().getY() + "," + (int)p.getLocation().getZ());
             }else if(cmd.getName().equalsIgnoreCase("base")) {
-                Main.main.eco.tpBase(p);
+				instance.eco.tpBase(p);
             }else if(cmd.getName().equalsIgnoreCase("setbase")) {
-                Main.main.eco.setBase(p);
+				instance.eco.setBase(p);
             }else if(cmd.getName().equalsIgnoreCase("info")) {
             	p.sendMessage("§7[§cCONSOLE§7] §fINFORMATION CONCERNENT LE SERVER");
             	p.sendMessage("");
@@ -199,10 +203,10 @@ public class Command implements CommandExecutor {
             			if(arg[1].equalsIgnoreCase("money")) {
             				set(1, p, t, arg);
             			}else if(arg[1].equalsIgnoreCase("base")) {
-            				if(Main.main.base.containsKey(t.getName())) {
-                    			Main.main.base.remove(t.getName());
+            				if(instance.base.containsKey(t.getName())) {
+								instance.base.remove(t.getName());
                     		}
-                    		Main.main.base.put(t.getName(), p.getLocation());
+							instance.base.put(t.getName(), p.getLocation());
                     		p.sendMessage("§7(§9i§7) §f>> §7La base de §4" + t.getName() + " §7a été redéfinis en §4" + (int)p.getLocation().getX() + "," + (int)p.getLocation().getY() + "," + (int)p.getLocation().getZ());
                     		t.sendMessage("§7(§9i§7) §f>> §7Votre base a été redéfinis en §4" + (int)p.getLocation().getX() + "," + (int)p.getLocation().getY() + "," + (int)p.getLocation().getZ() + " §7(par un admin)");
             			}else if(arg[1].equalsIgnoreCase("heart")) {
@@ -260,7 +264,7 @@ public class Command implements CommandExecutor {
             		if(state == null) {
             			p.sendMessage("§7(§c!§7) §f>> §7Ce stade n'existe pas (0 à 7)");
             		}else {
-            			Main.main.boss.bossLoc.put(state, p.getLocation());
+						instance.boss.bossLoc.put(state, p.getLocation());
             			p.sendMessage("§7[§cCONSOLE§7] §f>> §7Le §4spawn§7 du boss du stade " + state.getName() +"§7 a bien été redéfinis en " + (int)p.getLocation().getX() + "," + (int)p.getLocation().getY() + "," + (int)p.getLocation().getZ());
             		}
             	}
@@ -288,12 +292,12 @@ public class Command implements CommandExecutor {
                         	p.sendMessage("§7(§c!§7) §f>> §7Ce stade n'existe pas (0 à 7)");
                         }else {
                         	if(Main.main.boss.itemBlock.containsKey(m)) {
-                        		Main.main.boss.itemBlock.get(m).add(state);
+								instance.boss.itemBlock.get(m).add(state);
                         		p.sendMessage("§7(§9i§7) §f>> §7Le matériel a été ajouté");
                         	}else {
                         		List<State> list = new ArrayList<>();
                         		list.add(state);
-                        		Main.main.boss.itemBlock.put(m, list);
+								instance.boss.itemBlock.put(m, list);
                         		p.sendMessage("§7(§9i§7) §f>> §7Le matériel a été ajouté");
                         	}
                         }
@@ -320,14 +324,14 @@ public class Command implements CommandExecutor {
 			}
 			if(value >= 0) {
 				if(type == 1) {
-					Main.main.money.remove(t.getName());
-					Main.main.money.put(t.getName(), value);
+					instance.money.remove(t.getName());
+					instance.money.put(t.getName(), value);
 					t.sendMessage("§7(§ee§7) §f>> §7Votre §4solde §7est a présent de §4" + value + "€ §7(changer par un admin)");
 					p.sendMessage("§7(§ee§7) §f>> §7La solde de §f" + t.getName() + " §7est a présent de §4" + value + "€");
 				}else if(type == 2) {
 					if(value <= 40) {
-						Main.main.hearts.remove(t.getName());
-						Main.main.hearts.put(t.getName(), (int) Math.round(value));
+						instance.hearts.remove(t.getName());
+						instance.hearts.put(t.getName(), (int) Math.round(value));
 						t.setHealthScale(value);
 						p.sendMessage("§7(§9i§7) §f>> §7Vous êtes à présent à §4" + value + " §7coeurs (changer par un admin)");
 						t.sendMessage("§7(§9i§7) §f>> §7Le joueur §4" + t.getName() + "§7 est à présent à §4" + value + " §7coeurs");
@@ -336,28 +340,28 @@ public class Command implements CommandExecutor {
 					}
 				}else if(type == 3) {
 					if(value == 0) {
-						Main.main.metier.remove(t.getName());
-						Main.main.metier.put(t.getName(), null);
+						instance.metier.remove(t.getName());
+						instance.metier.put(t.getName(), null);
 						p.sendMessage("§7(§9i§7) §f>> §7Vous n'avez plus de métier (changer par un admin)");
 						t.sendMessage("§7(§9i§7) §f>> §7Le joueur §4" + t.getName() + "§7 n'a plus de metier");
 					}else if(value == 1) {
-						Main.main.metier.remove(t.getName());
-						Main.main.metier.put(t.getName(), Metier.BUCHERON);
+						instance.metier.remove(t.getName());
+						instance.metier.put(t.getName(), Metier.BUCHERON);
 						p.sendMessage("§7(§9i§7) §f>> §7Vous êtes à présent §4" + Metier.BUCHERON.toString().toLowerCase() + "§7 (changer par un admin)");
 						t.sendMessage("§7(§9i§7) §f>> §7Le joueur §4" + t.getName() + "§7 est à présent §4" + Metier.BUCHERON.toString().toLowerCase());
 					}else if(value == 2) {
-						Main.main.metier.remove(t.getName());
-						Main.main.metier.put(t.getName(), Metier.MINEUR);
+						instance.metier.remove(t.getName());
+						instance.metier.put(t.getName(), Metier.MINEUR);
 						p.sendMessage("§7(§9i§7) §f>> §7Vous êtes à présent §4" + Metier.MINEUR.toString().toLowerCase() + "§7 (changer par un admin)");
 						t.sendMessage("§7(§9i§7) §f>> §7Le joueur §4" + t.getName() + "§7 est à présent §4" + Metier.MINEUR.toString().toLowerCase());
 					}else if(value == 3) {
-						Main.main.metier.remove(t.getName());
-						Main.main.metier.put(t.getName(), Metier.AGRICULTEUR);
+						instance.metier.remove(t.getName());
+						instance.metier.put(t.getName(), Metier.AGRICULTEUR);
 						p.sendMessage("§7(§9i§7) §f>> §7Vous êtes à présent §4" + Metier.AGRICULTEUR.toString().toLowerCase() + "§7 (changer par un admin)");
 						t.sendMessage("§7(§9i§7) §f>> §7Le joueur §4" + t.getName() + "§7 est à présent §4" + Metier.AGRICULTEUR.toString().toLowerCase());
 					}else if(value == 4) {
-						Main.main.metier.remove(t.getName());
-						Main.main.metier.put(t.getName(), Metier.COMBATTANT);
+						instance.metier.remove(t.getName());
+						instance.metier.put(t.getName(), Metier.COMBATTANT);
 						p.sendMessage("§7(§9i§7) §f>> §7Vous êtes à présent §4" + Metier.COMBATTANT.toString().toLowerCase() + "§7 (changer par un admin)");
 						t.sendMessage("§7(§9i§7) §f>> §7Le joueur §4" + t.getName() + "§7 est à présent §4" + Metier.COMBATTANT.toString().toLowerCase());
 					}else {
@@ -366,12 +370,12 @@ public class Command implements CommandExecutor {
 				}else if (type == 4){
 					State state = State.getValuefromInt((int) Math.round(value));
 					if(state != null) {
-						Main.main.state.remove(t.getName());
-						Main.main.state.put(t.getName(), state);
+						instance.state.remove(t.getName());
+						instance.state.put(t.getName(), state);
 	    				p.sendMessage("§7(§9i§7) §f>> §7Vous êtes à présent §4" + state.getName() + "§7 (changer par un admin)");
 						t.sendMessage("§7(§9i§7) §f>> §7Le joueur §4" + t.getName() + "§7 est à présent §4" + state.getName());
 						for(Player player : Bukkit.getOnlinePlayers()) {
-							Main.main.team.teams(player);
+							instance.team.teams(player);
 						}
 					}else {
 						p.sendMessage("§7(§c!§7) §f>> §7Le nombre doit être entre 0 et 7");
