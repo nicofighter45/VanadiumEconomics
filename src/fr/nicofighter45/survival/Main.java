@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.sun.applet2.AppletParameters;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -21,6 +22,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -51,6 +53,7 @@ public class Main extends JavaPlugin{
 	public team team;
 	public ArrayList<String> configplayer = new ArrayList<>();
 	public HashMap<String, Location> deadplayer = new HashMap<>();
+	public HashMap<String, PlayerInventory> deadinventory = new HashMap<>();
 	public HashMap<String, Double> money = new HashMap<>();
 	public HashMap<String, Location> base = new HashMap<>();
 	public HashMap<String, Integer> hearts = new HashMap<>();
@@ -59,7 +62,7 @@ public class Main extends JavaPlugin{
 	public HashMap<Player, ScoreboardCustom> sc= new HashMap<>();
 	public HashMap<String, TeamFight> teamFight = new HashMap<>();
 	public HashMap<TeamFight, State> stateFight = new HashMap<>();
-	
+
 	@Override
 	public void onEnable() {
 		main = this;

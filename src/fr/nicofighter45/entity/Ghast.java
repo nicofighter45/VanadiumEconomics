@@ -14,6 +14,7 @@ public class Ghast extends EntityGhast {
         super(EntityTypes.GHAST, ((CraftWorld) Objects.requireNonNull(loc.getWorld())).getHandle());
         this.setLocation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
         this.setCustomName(new ChatComponentText("§4Boss N-Nether"));
+        this.setInvisible(true);
         Objects.requireNonNull(this.getAttributeInstance(GenericAttributes.ATTACK_DAMAGE)).setValue(50.0D);
         Objects.requireNonNull(this.getAttributeInstance(GenericAttributes.ARMOR)).setValue(100.0D);
         Objects.requireNonNull(this.getAttributeInstance(GenericAttributes.MOVEMENT_SPEED)).setValue(1D);

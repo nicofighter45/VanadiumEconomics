@@ -68,7 +68,7 @@ public class Boss {
 			new Wither(bossLoc.get(team.state));
 			break;
 		case NN:
-			//ghast invisible
+			new Ghast(bossLoc.get(team.state));
 			break;
 		case E:
 			//ender dragon

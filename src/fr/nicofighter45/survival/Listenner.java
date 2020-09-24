@@ -34,6 +34,7 @@ import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -163,6 +164,8 @@ public class Listenner implements Listener {
 				player.setHealth(20);
 				player.setGameMode(GameMode.SPECTATOR);
 				instance.deadplayer.put(player.getName(), player.getLocation());
+				instance.deadinventory.put(player.getName(), player.getInventory());
+				player.getInventory().clear();
 				player.teleport(new Location(Main.main.world, Main.main.spawn.getX(), Main.main.spawn.getY() + 20, Main.main.spawn.getZ()));
 				Inventory i = Bukkit.createInventory(null, 27, "§4Tu es mort");
 				i.setItem(11, item(Material.GOLDEN_APPLE, "§aRespawn comme en survie", "§9Avec 10% de money en moins"));
@@ -471,7 +474,33 @@ public class Listenner implements Listener {
     			p.sendMessage("§7(§9i§7) §f>> §7Vous êtes a présent §4bucheron");
 			}
 			p.closeInventory();
+		}else if(i.contains(item(Material.OAK_SIGN, "§4Tu es mort", "§6Choisi une option de résurection"))){
+			e.setCancelled(true);
+			Player p = (Player) e.getWhoClicked();
+			if(item.getType() == Material.GOLDEN_APPLE){
+				p.setGameMode(GameMode.SURVIVAL);
+				p.teleport(instance.spawn);
+				instance.deadplayer.remove(p.getName());
+				instance.eco.pay(p, null, instance.money.get(p)/10);
+				Objects.requireNonNull(instance.deadplayer.get(p.getName()).getWorld()).dropItem(instance.deadplayer.get(p.getName()), Objects.requireNonNull(allItem(instance.deadinventory.get(p))));
+			}else if(item.getType() == Material.TOTEM_OF_UNDYING){
+				if(instance.money.get(p.getName()) >= 11112){
+					instance.eco.pay(p, null, instance.money.get(p)/10 - 10000);
+					p.setGameMode(GameMode.SURVIVAL);
+					p.teleport(instance.spawn);
+					p.getInventory().addItem(allItem(instance.deadinventory.get(p.getName())));
+				}else{
+					p.sendMessage("§7(§c!§7) §f>> §7Vous n'avez pas assez d'§4argent §7pour utiliser cette option de réanimation");
+				}
+			}
 		}
+	}
+
+	private ItemStack allItem(PlayerInventory itemStacks){
+		for (ItemStack it : itemStacks) {
+			return it;
+		}
+		return null;
 	}
 
 	@EventHandler
